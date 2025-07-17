@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  forms     Form[]
+}
+
+model Form {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  publicUrl   String     @unique
+  adminId     String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  admin       Admin      @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  questions   Question[]
+  responses   Response[]
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  formId    String
+  type      String
+  label     String
+  options   String?
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  answers   Answer[]
+}
+
+model Response {
+  id          String   @id @default(uuid())
+  formId      String
+  submittedAt DateTime @default(now())
+  form        Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  answers     Answer[]
+}
+
+model Answer {
+  id         String   @id @default(uuid())
+  responseId String
+  questionId String
+  value      String // Added this field to actually store the answer value
+  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}

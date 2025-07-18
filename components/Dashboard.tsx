@@ -4,6 +4,37 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PlusIcon } from "lucide-react";
 import { motion } from "motion/react";
+
+type Form = {
+  id: string;
+  title: string;
+  description: string;
+  publicUrl: string;
+  responses?: {
+    id: string;
+    formId: string;
+    name: string;
+    submittedAt: string; // or Date if parsed
+
+    answers: {
+      id: string;
+      responseId: string;
+      questionId: string;
+      value: string;
+
+      question: {
+        id: string;
+        formId: string;
+        type: string;
+        label: string;
+        options: string;
+        order: number;
+        createdAt: string;
+        updatedAt: string;
+      };
+    }[];
+  }[];
+};
 const DashboardClient = ({
   adminId,
   adminName,
@@ -11,36 +42,6 @@ const DashboardClient = ({
   adminId: string;
   adminName: string;
 }) => {
-  type Form = {
-    id: string;
-    title: string;
-    description: string;
-    publicUrl: string;
-    responses?: {
-      id: string;
-      formId: string;
-      name: string;
-      submittedAt: string; // or Date if parsed
-
-      answers: {
-        id: string;
-        responseId: string;
-        questionId: string;
-        value: string;
-
-        question: {
-          id: string;
-          formId: string;
-          type: string;
-          label: string;
-          options: string; // or string[] if parsed
-          order: number;
-          createdAt: string;
-          updatedAt: string;
-        };
-      }[];
-    }[];
-  };
   const [forms, setForms] = useState<Form[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 

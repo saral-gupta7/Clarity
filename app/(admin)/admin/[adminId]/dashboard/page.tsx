@@ -6,7 +6,7 @@ const AdminDashboard = async ({ params }: { params: { adminId: string } }) => {
 
   const admin = await prisma.admin.findUnique({
     where: { id: adminId },
-    select: { id: true, name: true }, // Adjust field names based on your schema
+    select: { id: true, name: true },
   });
 
   if (!admin) {

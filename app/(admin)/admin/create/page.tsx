@@ -1,5 +1,11 @@
 "use client";
-import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
+import {
+  useForm,
+  SubmitHandler,
+  useFieldArray,
+  Control,
+  UseFormRegister,
+} from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
@@ -8,13 +14,15 @@ import axios from "axios";
 
 import { formSchema } from "@/lib/schema";
 import { useEffect, useState } from "react";
-
-type Option = {
-  value: string;
-};
+import { motion } from "motion/react";
 
 export type CreateFormFields = z.infer<typeof formSchema>;
 
+type MultipleChoiceOptionsProps = {
+  control: Control<CreateFormFields>;
+  questionIndex: number;
+  register: UseFormRegister<CreateFormFields>;
+};
 const CreateForm = () => {
   const [adminId, setAdminId] = useState<string | null>(null);
 
@@ -42,7 +50,6 @@ const CreateForm = () => {
     handleSubmit,
     control,
     watch,
-    setError,
     formState: { errors },
   } = useForm<CreateFormFields>({
     defaultValues: { questions: [] },
@@ -85,11 +92,24 @@ const CreateForm = () => {
   };
 
   return (
-    <section className="min-h-screen w-full flex justify-center px-10 py-40 ">
-      <div className="p-10 sm:p-20 border-1 w-full max-w-4xl border-light/10">
-        <form
+    <motion.section
+      className="min-h-screen w-full flex justify-center px-10 py-40 "
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div
+        className="p-10 sm:p-20 border-1 w-full max-w-4xl border-light/10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <motion.form
           className="flex flex-col gap-3 max-w-3xl"
           onSubmit={handleSubmit(onSubmit)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
         >
           <label htmlFor="description">Title</label>
           <input
@@ -151,7 +171,8 @@ const CreateForm = () => {
                 />
               )}
               {watchedQuestions?.[index]?.type === "multiple_choice" &&
-                watchedQuestions[index]?.options?.length < 2 && (
+                watchedQuestions?.[index]?.options &&
+                watchedQuestions[index].options.length < 2 && (
                   <p className="text-red-400">
                     Please add at least 2 options for this multiple choice
                     question.
@@ -185,13 +206,17 @@ const CreateForm = () => {
           >
             Submit
           </button>
-        </form>
-      </div>
-    </section>
+        </motion.form>
+      </motion.div>
+    </motion.section>
   );
 };
 
-const MultipleChoiceOptions = ({ control, questionIndex, register }: any) => {
+const MultipleChoiceOptions = ({
+  control,
+  questionIndex,
+  register,
+}: MultipleChoiceOptionsProps) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: `questions.${questionIndex}.options`,

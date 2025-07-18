@@ -1,11 +1,10 @@
 "use client";
 import Link from "next/link";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LogOutIcon } from "lucide-react";
 
 const Navbar = () => {
-  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [adminId, setAdminId] = useState("");
 
@@ -29,7 +28,6 @@ const Navbar = () => {
   }, []);
 
   const items = [
-    { title: "About", key: "about", url: "/about" },
     ...(isLoggedIn
       ? [
           {
@@ -55,7 +53,11 @@ const Navbar = () => {
       <div>
         <ul className="flex gap-5">
           {items.map(({ title, key, url }) => (
-            <Link href={url} key={key}>
+            <Link
+              href={url}
+              key={key}
+              className="bg-[#12131A] px-4 py-2 rounded-sm border-light/10 border-[0.5px] "
+            >
               {title}
             </Link>
           ))}
@@ -68,7 +70,7 @@ const Navbar = () => {
             onClick={handleLogout}
             className="border-[0.5px] border-light/10 bg-[#12131A] text-light"
           >
-            Logout
+            <LogOutIcon size={18} className="text-red-300" />
           </button>
         ) : (
           <>

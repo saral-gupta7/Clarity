@@ -16,10 +16,7 @@ export default function SuccessPage() {
       <h1 className="text-2xl font-semibold mb-4">
         Thank you for your response!
       </h1>
-      <button
-        onClick={handleSubmitAnother}
-        className="px-4 py-2 bg-blue-600 text-white rounded"
-      >
+      <button onClick={handleSubmitAnother} className="px-4 py-2 rounded">
         Submit Another Response
       </button>
     </div>

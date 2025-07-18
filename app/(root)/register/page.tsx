@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import axios from "axios";
+import { motion } from "motion/react";
+import { useEffect } from "react";
 
 type FormFields = {
   email: string;
@@ -25,9 +27,21 @@ const Login = () => {
     resolver: zodResolver(registerAdminSchema),
   });
 
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const res = await axios.get("/api/session");
+        if (res.data.authenticated && res.data.admin?.role === "admin") {
+          router.push(`/admin/${res.data.admin.id}/dashboard`);
+        }
+      } catch {}
+    };
+    fetchSession();
+  }, [router]);
+
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     try {
-      const res = await axios.post("/api/registerAdmin", {
+      await axios.post("/api/registerAdmin", {
         name: data.name,
         email: data.email,
         password: data.password,
@@ -35,7 +49,7 @@ const Login = () => {
 
       setTimeout(() => {
         router.push("/login");
-      }, 700);
+      }, 1000);
 
       console.log("Admin Registered successfully!");
     } catch (error) {
@@ -54,9 +68,19 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen w-full">
+    <motion.div
+      className="h-screen w-full"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="grid grid-cols-1 md:grid-cols-2">
-        <div className="w-full hidden md:flex flex-col justify-between py-20 pl-20 pt-15">
+        <motion.div
+          className="w-full hidden md:flex flex-col justify-between py-20 pl-20 pt-15"
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <Link href={"/"}>
             <h1 className="font-instrument text-3xl font-bold">Clarity</h1>
           </Link>
@@ -65,17 +89,25 @@ const Login = () => {
             <span>Their Insights.</span>
             <span>One Form Away</span>
           </h1>
-        </div>
-        <div className="flex-center h-screen flex-col px-10">
+        </motion.div>
+        <motion.div
+          className="flex-center h-screen flex-col px-10"
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <h1 className="capitalize flex-center sm:hidden flex-wrap text-center gap-3 text-xl font-bold font-lato">
             <span>Yours Ideas.</span>
             <span>Their Insights.</span>
             <span>One Form Away.</span>
           </h1>
-          <form
+          <motion.form
             action=""
             className="flex flex-col gap-5 p-10 max-w-100 w-full"
             onSubmit={handleSubmit(onSubmit)}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
           >
             <div className="flex flex-col gap-2">
               <h1 className="text-xl ">Join Now</h1>
@@ -93,7 +125,7 @@ const Login = () => {
               placeholder="Name"
             />
             {errors.name && (
-              <p className="text-red-300 text-sm">{errors.name.message}</p>
+              <p className="text-red-500">{errors.name.message}</p>
             )}
 
             <label htmlFor="email" className="-mb-2">
@@ -106,7 +138,7 @@ const Login = () => {
               placeholder="Email"
             />
             {errors.email && (
-              <p className="text-red-300 text-sm">{errors.email.message}</p>
+              <p className="text-red-500">{errors.email.message}</p>
             )}
 
             <label htmlFor="password" className="-mb-2">
@@ -119,7 +151,7 @@ const Login = () => {
               placeholder="Password"
             />
             {errors.password && (
-              <p className="text-red-300 text-sm">{errors.password.message}</p>
+              <p className="text-red-500">{errors.password.message}</p>
             )}
 
             <button type="submit">Submit</button>
@@ -129,10 +161,10 @@ const Login = () => {
                 Sign In
               </Link>
             </p>
-          </form>
-        </div>
+          </motion.form>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

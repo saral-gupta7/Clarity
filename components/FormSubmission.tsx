@@ -2,20 +2,27 @@
 import { useForm, SubmitHandler } from "react-hook-form";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
 
 type Answer = {
   questionId: string;
   value: string;
 };
 
-type Questions = {
+type Question = {
   id: string;
   label: string;
   type: string;
   options?: string[];
 };
+type Form = {
+  questions: Question[];
+  publicUrl: string;
+  title: string;
+  description: string;
+};
 
-const FormSubmission = ({ form }: { form: any }) => {
+const FormSubmission = ({ form }: { form: Form }) => {
   const router = useRouter();
   const { questions, publicUrl, title, description } = form;
 
@@ -25,10 +32,19 @@ const FormSubmission = ({ form }: { form: any }) => {
     formState: { errors },
   } = useForm<Record<string, string>>();
 
-  const processedQuestions = questions.map((q: Questions) => ({
-    ...q,
-    options: q.options ? JSON.parse(q.options) : null,
-  }));
+  const processedQuestions: Question[] = questions.map((q) => {
+    let options: string[] | undefined = undefined;
+    if (typeof q.options === "string") {
+      try {
+        options = JSON.parse(q.options);
+      } catch {
+        options = undefined;
+      }
+    } else if (Array.isArray(q.options)) {
+      options = q.options;
+    }
+    return { ...q, options };
+  });
 
   const onSubmit: SubmitHandler<Record<string, string>> = async (data) => {
     const name = data.name;
@@ -56,14 +72,44 @@ const FormSubmission = ({ form }: { form: any }) => {
   };
 
   return (
-    <section className="h-screen w-full flex-center flex-col px-10">
-      <div className="w-full max-w-5xl flex flex-col gap-5">
+    <motion.section
+      className="h-screen w-full flex-center flex-col px-10"
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div
+        className="w-full max-w-5xl flex flex-col gap-5"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+      >
         <div>
-          <h1 className="text-2xl font-bold capitalize">{title}</h1>
-          <h2 className="text-xl text-[#656667] capitalize">{description}</h2>
+          <motion.h1
+            className="text-2xl font-bold capitalize"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {title}
+          </motion.h1>
+          <motion.h2
+            className="text-xl text-[#656667] capitalize"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {description}
+          </motion.h2>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <motion.form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        >
           {/* Name Field */}
           <div className="flex flex-col gap-2">
             <label>Your Name</label>
@@ -85,49 +131,61 @@ const FormSubmission = ({ form }: { form: any }) => {
           </div>
 
           {/* Dynamic Questions */}
-          {processedQuestions.map(({ id, label, type, options }) => (
-            <div key={id} className="flex flex-col gap-2">
-              <label className="capitalize">{label}</label>
-              {type === "text" ? (
-                <>
-                  <input
-                    {...register(id, { required: "This field is required." })}
-                    type="text"
-                    className="border px-3 py-2"
-                  />
-                  {errors[id] && (
-                    <p className="text-red-400 text-sm">
-                      {errors[id]?.message}
-                    </p>
-                  )}
-                </>
-              ) : (
-                options?.map((option) => (
-                  <label key={option} className="block">
+          {processedQuestions.map(
+            ({
+              id,
+              label,
+              type,
+              options,
+            }: {
+              id: string;
+              label: string;
+              type: string;
+              options?: string[];
+            }) => (
+              <div key={id} className="flex flex-col gap-2">
+                <label className="capitalize">{label}</label>
+                {type === "text" ? (
+                  <>
                     <input
-                      {...register(id, {
-                        required: "Please select an option.",
-                      })}
-                      type="radio"
-                      value={option}
-                      className="mr-2"
+                      {...register(id, { required: "This field is required." })}
+                      type="text"
+                      className="border px-3 py-2"
                     />
-                    {option}
-                  </label>
-                ))
-              )}
-              {errors[id] && type === "multiple_choice" && (
-                <p className="text-red-400 text-sm">{errors[id]?.message}</p>
-              )}
-            </div>
-          ))}
+                    {errors[id] && (
+                      <p className="text-red-400 text-sm">
+                        {errors[id]?.message}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  options?.map((option) => (
+                    <label key={option} className="block">
+                      <input
+                        {...register(id, {
+                          required: "Please select an option.",
+                        })}
+                        type="radio"
+                        value={option}
+                        className="mr-2"
+                      />
+                      {option}
+                    </label>
+                  ))
+                )}
+                {errors[id] && type === "multiple_choice" && (
+                  <p className="text-red-400 text-sm">{errors[id]?.message}</p>
+                )}
+              </div>
+            )
+          )}
 
           <button type="submit" className="flex-center px-4 py-2 w-fit">
             Submit
           </button>
-        </form>
-      </div>
-    </section>
+        </motion.form>
+      </motion.div>
+    </motion.section>
   );
 };
 

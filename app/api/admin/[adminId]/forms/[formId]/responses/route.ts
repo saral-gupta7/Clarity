@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET(context: {
-  params: { adminId: string; formId: string };
-}) {
-  const { adminId, formId } = context.params;
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { adminId: string; formId: string } }
+) {
+  const { adminId, formId } = params;
 
   try {
     const form = await prisma.form.findFirst({

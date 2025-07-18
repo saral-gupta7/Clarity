@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function GET(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: { adminId: string; formId: string } }
 ) {
   const { adminId, formId } = params;

@@ -9,6 +9,7 @@ Clarity is a modern, full-stack web application for creating, sharing, and manag
 ### For Admins
 
 - **Admin Registration & Login:** Secure authentication for form creators.
+- **Session-Aware Routing:** If already logged in, admins are redirected to their dashboard from login/register/landing. If session expires, they're redirected to the home page.
 - **Dashboard:** View and manage all your forms and their responses.
 - **Form Creation:** Easily create new forms with customizable questions.
 - **Response Management:** View and analyze user submissions for each form.
@@ -22,12 +23,22 @@ Clarity is a modern, full-stack web application for creating, sharing, and manag
 
 ## Tech Stack
 
-- **Frontend:** Next.js (App Router), React, Tailwind CSS
+- **Frontend:** Next.js (App Router), React, Tailwind CSS, [motion/react](https://motion.dev/) (for beautiful, snappy animations)
 - **Backend:** Next.js API routes, Prisma ORM
 - **Database:** PostgreSQL (hosted on [Supabase](https://supabase.com/))
-- **Authentication:** Custom (admin only)
+- **Authentication:** Custom (admin only, with session-based JWT and automatic dashboard redirects)
 - **ORM:** Prisma
+- **Type Safety:** Full TypeScript with strict types (no `any` usage in user-facing code)
 - **Package Manager:** [pnpm](https://pnpm.io/) (recommended)
+
+---
+
+## Animations & UX
+
+- **Smooth Animations:** All major pages and components (Landing, Login, Register, Dashboard, Create Form, Public Form, Responses) use [motion/react](https://motion.dev/) for fast, modern entrance and interaction animations.
+- **Snappy Feel:** Animation delays and durations are tuned for a fast, delightful user experience.
+- **Share Link Feedback:** Dashboard share buttons provide instant "Link Copied" feedback.
+- **Responsive Error Handling:** Error messages are styled and responsive for all devices.
 
 ---
 
@@ -60,11 +71,14 @@ pnpm install
 
 ### 4. Configure Environment Variables
 
-Create a `.env` file in the root directory and add your database connection string. You can obtain the `DATABASE_URL` for your PostgreSQL database from your [Supabase](https://supabase.com/) project settings:
+Create a `.env` file in the root directory and add your environment variables:
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+JWT_SECRET="your-very-secure-random-string"
 ```
+
+> **Note:** `JWT_SECRET` is required for authentication/session security. Use a long, random string for production.
 
 ### 5. Set Up the Database
 

@@ -1,28 +1,52 @@
 "use client";
 import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+
+import { formSchema } from "@/lib/schema";
+import { useEffect, useState } from "react";
 
 type Option = {
   value: string;
 };
 
-type Question = {
-  type: string;
-  label: string;
-  options?: Option[];
-};
-
-type CreateFormFields = {
-  title: string;
-  description: string;
-  questions: Question[];
-};
+export type CreateFormFields = z.infer<typeof formSchema>;
 
 const CreateForm = () => {
+  const [adminId, setAdminId] = useState<string | null>(null);
+
   const router = useRouter();
-  const { register, handleSubmit, control, watch } = useForm<CreateFormFields>({
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const res = await axios.get("/api/session");
+        if (res.data.authenticated && res.data.admin?.role === "admin") {
+          setAdminId(res.data.admin.id);
+        } else {
+          console.log("session not found!");
+        }
+      } catch (error) {
+        console.error("Session fetch error", error);
+        router.push("/login");
+      }
+    };
+
+    fetchSession();
+  }, [router]);
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setError,
+    formState: { errors },
+  } = useForm<CreateFormFields>({
     defaultValues: { questions: [] },
+    resolver: zodResolver(formSchema),
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -33,20 +57,24 @@ const CreateForm = () => {
   const watchedQuestions = watch("questions");
 
   const onSubmit: SubmitHandler<CreateFormFields> = async (data) => {
+    if (!adminId) {
+      console.error("Admin ID missing, cannot submit form.");
+      return;
+    }
     const processedData = {
       ...data,
       questions: data.questions.map((q) => ({
         ...q,
         options: q.options?.map((opt) => opt.value).filter(Boolean),
       })),
-      adminId: "f1b1f0bb-e647-4668-bcf9-277811f38a32",
+      adminId,
     };
 
     try {
       const res = await axios.post("/api/createForm", processedData);
 
       if (res.data?.form?.publicUrl) {
-        router.push(`/forms/${res.data.form.publicUrl}`);
+        router.push(`/admin/${adminId}/dashboard`);
       } else {
         console.error("publicUrl missing in response");
       }
@@ -68,15 +96,21 @@ const CreateForm = () => {
             {...register("title")}
             type="text"
             placeholder="What's the title of your form?"
-            className="border-b-2 border-light outline-none border-0 "
           />
-          <label htmlFor="description">Description</label>
+
+          {errors.title && (
+            <p className="text-red-400">{errors.title.message}</p>
+          )}
+          <label htmlFor="description">Description (Optional)</label>
           <input
             {...register("description")}
             type="text"
-            className="border-b-2 border-light outline-none border-0 "
             placeholder="Add a short description for better clarity"
           />
+
+          {errors.description && (
+            <p className="text-red-400">{errors.description.message}</p>
+          )}
 
           {fields.map((field, index) => (
             <div key={field.id} className="py-5 flex flex-col gap-5">
@@ -101,8 +135,13 @@ const CreateForm = () => {
               <input
                 {...register(`questions.${index}.label` as const)}
                 placeholder="Enter your question"
-                className="border-b-2 border-light outline-none border-0 flex-1"
               />
+
+              {errors.questions?.[index]?.label && (
+                <p className="text-red-400">
+                  {errors.questions[index]?.label?.message}
+                </p>
+              )}
 
               {watchedQuestions?.[index]?.type === "multiple_choice" && (
                 <MultipleChoiceOptions
@@ -110,6 +149,19 @@ const CreateForm = () => {
                   questionIndex={index}
                   register={register}
                 />
+              )}
+              {watchedQuestions?.[index]?.type === "multiple_choice" &&
+                watchedQuestions[index]?.options?.length < 2 && (
+                  <p className="text-red-400">
+                    Please add at least 2 options for this multiple choice
+                    question.
+                  </p>
+                )}
+
+              {errors.questions?.[index]?.options && (
+                <p className="text-red-400">
+                  {errors.questions[index]?.options?.message}
+                </p>
               )}
             </div>
           ))}
@@ -126,7 +178,10 @@ const CreateForm = () => {
 
           <button
             type="submit"
-            className="px-4 py-2 bg-black text-white text-sm"
+            className={`px-4 py-2 text-dark text-sm ${
+              fields.length === 0 ? "opacity-70 cursor-not-allowed" : ""
+            }`}
+            disabled={fields.length === 0}
           >
             Submit
           </button>

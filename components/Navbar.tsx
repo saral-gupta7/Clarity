@@ -1,31 +1,87 @@
-import { navItem } from "@/constants";
+"use client";
 import Link from "next/link";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 const Navbar = () => {
+  const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [adminId, setAdminId] = useState("");
+
+  const handleLogout = async () => {
+    await axios.post("/api/logoutAdmin");
+    setTimeout(() => (window.location.href = "/"), 700);
+  };
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await axios.get("/api/session", { withCredentials: true });
+        setIsLoggedIn(res.data.authenticated);
+        setAdminId(res.data.admin.id);
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkSession();
+  }, []);
+
+  const items = [
+    { title: "About", key: "about", url: "/about" },
+    ...(isLoggedIn
+      ? [
+          {
+            title: "Dashboard",
+            key: "dashboard",
+            url: `/admin/${adminId}/dashboard`,
+          },
+        ]
+      : []),
+    ...(isLoggedIn
+      ? [{ title: "Create", key: "create", url: `/admin/create` }]
+      : []),
+  ];
+
   return (
     <article className="max-w-7xl mx-auto grid grid-cols-3 place-items-center px-10 py-10 bg-transparent fixed top-0 inset-x-0 z-50 backdrop-blur-xl">
       <div>
         <Link href={"/"}>
-          <h1 className="font-instrument text-3xl font-bold ">Clarity</h1>
+          <h1 className="font-instrument text-3xl font-bold">Clarity</h1>
         </Link>
       </div>
+
       <div>
         <ul className="flex gap-5">
-          {navItem.map(({ title, key }) => (
-            <Link href={key} key={key}>
+          {items.map(({ title, key, url }) => (
+            <Link href={url} key={key}>
               {title}
             </Link>
           ))}
         </ul>
       </div>
+
       <div className="flex gap-4">
-        <Link href={"/login"}>
-          <button className="border-[0.5px] border-light/10 bg-[#1b1c1b] text-light">
-            Sign In
+        {isLoggedIn ? (
+          <button
+            onClick={handleLogout}
+            className="border-[0.5px] border-light/10 bg-[#12131A] text-light"
+          >
+            Logout
           </button>
-        </Link>
-        <Link href={"/register"}>
-          <button className="">Sign Up</button>
-        </Link>
+        ) : (
+          <>
+            <Link href={"/login"}>
+              <button className="border-[0.5px] border-light/10 bg-[#12131A] text-light">
+                Sign In
+              </button>
+            </Link>
+            <Link href={"/register"}>
+              <button>Sign Up</button>
+            </Link>
+          </>
+        )}
       </div>
     </article>
   );

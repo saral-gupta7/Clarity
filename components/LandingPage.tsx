@@ -1,3 +1,5 @@
+import LogoutButton from "./Logout";
+
 const LandingPage = () => {
   return (
     <section className="relative min-h-screen w-full bg-[#0B0C10] text-[#E3E9FF] flex-center py-10 px-20 ">

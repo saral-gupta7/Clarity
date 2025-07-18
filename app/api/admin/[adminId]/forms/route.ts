@@ -7,6 +7,12 @@ export async function GET(
 ) {
   try {
     const { adminId } = await params;
+    const adminExist = await prisma.admin.findUnique({
+      where: { id: adminId, role: "admin" },
+    });
+    if (!adminExist) {
+      return NextResponse.redirect(new URL("/admin/login", req.url));
+    }
     const forms = await prisma.form.findMany({
       where: { adminId: adminId },
     });

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
 import { ReactLenis, useLenis } from "lenis/react";
 
 const geistSans = Geist({
@@ -29,8 +28,8 @@ export default function RootLayout({
       <ReactLenis root />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
-        <Navbar />
         {children}
       </body>
     </html>

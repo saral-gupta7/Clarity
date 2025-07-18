@@ -6,18 +6,18 @@ export async function POST(
   { params }: { params: { publicUrl: string } }
 ) {
   try {
-    const { answers } = await req.json();
+    const { answers, name } = await req.json();
 
-    const url = await params.publicUrl;
-    if (!url || !answers || !Array.isArray(answers)) {
+    const { publicUrl } = await params;
+    if (!publicUrl || !answers || !Array.isArray(answers) || !name) {
       return NextResponse.json(
-        { message: "Invalid request data." },
+        { message: "Invalid request data. Name and answers are required." },
         { status: 400 }
       );
     }
 
     const form = await prisma.form.findUnique({
-      where: { publicUrl: url },
+      where: { publicUrl },
       include: { questions: true },
     });
 
@@ -40,6 +40,7 @@ export async function POST(
     const response = await prisma.response.create({
       data: {
         formId: form.id,
+        name,
         answers: {
           create: answers.map((a) => ({
             questionId: a.questionId,

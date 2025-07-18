@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET(
-  req: NextRequest,
-  context: { params: { adminId: string; formId: string } }
-) {
+export async function GET(context: {
+  params: { adminId: string; formId: string };
+}) {
   const { adminId, formId } = context.params;
 
   try {

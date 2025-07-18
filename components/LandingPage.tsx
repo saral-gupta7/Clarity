@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { motion } from "motion/react";
 
+import Link from "next/link";
 const LandingPage = () => {
   const router = useRouter();
 
@@ -48,14 +49,16 @@ const LandingPage = () => {
         >
           Cut Through the Noise — Gather Clear Answers with Clarity.
         </motion.h1>
-        <motion.button
-          className="text-dark"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.2 }}
-        >
-          Get Started
-        </motion.button>
+        <Link href={"/login"}>
+          <motion.button
+            className="text-dark"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            Get Started
+          </motion.button>
+        </Link>
       </motion.div>
     </motion.section>
   );

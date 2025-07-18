@@ -1,7 +1,11 @@
 import FormSubmission from "@/components/FormSubmission";
 import axios from "axios";
 
-const PublicForm = async ({ params }: { params: { publicUrl: string } }) => {
+type PublicPageProps = {
+  params: Promise<{ publicUrl: string }>;
+};
+
+const PublicForm = async ({ params }: PublicPageProps) => {
   try {
     const { publicUrl } = await params;
     const res = await axios.get(`http://localhost:3000/api/forms/${publicUrl}`);

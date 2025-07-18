@@ -2,9 +2,7 @@ import DashboardClient from "@/components/Dashboard";
 import prisma from "@/lib/prisma";
 
 type DashboardPageProps = {
-  params: {
-    adminId: string;
-  };
+  params: Promise<{ adminId: string }>;
 };
 const AdminDashboard = async ({ params }: DashboardPageProps) => {
   const { adminId } = await params;
